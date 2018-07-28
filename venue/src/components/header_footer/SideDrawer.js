@@ -11,7 +11,7 @@ const SideDrawer = props => {
       duration: 1500,
       delay: 100,
       smooth: true,
-      offset: -150
+      offset: -150 //Mitigate the Fixed HEader blocking
     });
     props.onClose(false);
   };
@@ -26,7 +26,7 @@ const SideDrawer = props => {
           Event starts in
         </ListItem>
 
-        <ListItem button onClick={() => scrollToElement("venuenfo")}>
+        <ListItem button onClick={() => scrollToElement("venueinfo")}>
           Venue NFO
         </ListItem>
 
