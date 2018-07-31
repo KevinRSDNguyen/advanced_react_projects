@@ -1,0 +1,67 @@
+{
+  "brands": [
+    {
+      "name": "Fender"
+    },
+
+    {
+      "name": "Ibanez"
+    },
+
+    {
+      "name": "Charvel"
+    },
+
+    {
+      "name": "Jackson"
+    },
+
+    {
+      "name": "Gibson"
+    },
+
+    {
+      "name": "Cort"
+    },
+
+    {
+      "name": "Schecter"
+    },
+
+    {
+      "name": "Reverend"
+    },
+
+    {
+      "name": "Ernie ball"
+    }
+  ],
+  "woods": [
+    {
+      "name": "Basswood"
+    },
+
+    {
+      "name": "Mahogany"
+    },
+
+    {
+      "name": "Alder"
+    }
+  ],
+  "users": [
+    {
+      "email": "test@gmail.com",
+      "name": "test",
+      "lastname": "test",
+      "password": "testtest",
+      "role": "1"
+    },
+    {
+      "email": "test1@gmail.com",
+      "name": "test",
+      "lastname": "test",
+      "password": "testtest"
+    }
+  ]
+}
