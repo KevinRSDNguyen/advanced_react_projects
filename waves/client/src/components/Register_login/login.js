@@ -1,10 +1,11 @@
 import React, { Component } from "react";
 import FormField from "../utils/Form/formfield";
+import { ToastContainer, toast } from "react-toastify";
 import { update, generateData, isFormValid } from "../utils/Form/formActions";
-import { withRouter } from "react-router-dom";
+import { withRouter, Redirect } from "react-router-dom";
 
 import { connect } from "react-redux";
-import { loginUser } from "../../actions/user_actions";
+import { loginUser, auth } from "../../actions/user_actions";
 
 class Login extends Component {
   state = {
@@ -58,7 +59,11 @@ class Login extends Component {
     let formIsValid = isFormValid(this.state.formdata, "login");
 
     if (formIsValid) {
-      this.props.loginUser(dataToSubmit, this.props.history);
+      loginUser(dataToSubmit)
+        .then(() => {
+          this.props.auth();
+        })
+        .catch(err => toast.error(err[0].detail));
     } else {
       this.setState({
         formError: true
@@ -66,9 +71,14 @@ class Login extends Component {
     }
   };
   render() {
-    const { loginSucces } = this.props.user;
+    const redirectOnLogin = this.props.user.userData.isAuth ? (
+      <Redirect to="/user/dashboard" />
+    ) : null;
+
     return (
       <div className="signin_wrapper">
+        <ToastContainer />
+        {redirectOnLogin}
         <form onSubmit={this.submitForm}>
           <FormField
             id={"email"}
@@ -80,7 +90,7 @@ class Login extends Component {
             formdata={this.state.formdata.password}
             change={element => this.updateForm(element)}
           />
-          {this.state.formError || loginSucces === false ? (
+          {this.state.formError ? (
             <div className="error_label">Please check your data</div>
           ) : null}
           <button onClick={this.submitForm}>Log in</button>
@@ -99,6 +109,6 @@ const mapStateToProps = state => {
 export default withRouter(
   connect(
     mapStateToProps,
-    { loginUser }
+    { auth }
   )(Login)
 );

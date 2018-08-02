@@ -3,7 +3,6 @@ import { ToastContainer, toast } from "react-toastify";
 import FormField from "../utils/Form/formfield";
 import { update, generateData, isFormValid } from "../utils/Form/formActions";
 
-// import { connect } from 'react-redux';
 import { registerUser } from "../../actions/user_actions";
 
 class Register extends Component {

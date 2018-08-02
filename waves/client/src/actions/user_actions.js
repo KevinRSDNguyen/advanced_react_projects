@@ -1,6 +1,6 @@
 import axios from "axios";
-import { LOGIN_USER, FAIL_LOGIN_USER } from "./types";
-import { USER_SERVER, PRODUCT_SERVER } from "../components/utils/misc";
+import { AUTH_USER, LOGOUT_USER } from "./types";
+import { USER_SERVER } from "../components/utils/misc";
 
 export const registerUser = dataToSubmit => {
   return axios
@@ -9,14 +9,36 @@ export const registerUser = dataToSubmit => {
     .catch(err => Promise.reject(err.response.data.errors));
 };
 
-export const loginUser = (dataToSubmit, history) => dispatch => {
-  axios
+export const loginUser = dataToSubmit => {
+  return axios
     .post(`${USER_SERVER}/login`, dataToSubmit)
     .then(({ data }) => {
-      history.push("/user/dashboard");
-      dispatch({ type: LOGIN_USER, payload: data });
+      return data;
     })
     .catch(err => {
-      dispatch({ type: FAIL_LOGIN_USER });
+      return Promise.reject(err.response.data.errors);
     });
+};
+
+export const auth = () => dispatch => {
+  axios
+    .get(`${USER_SERVER}/auth`)
+    .then(response => {
+      dispatch({
+        type: AUTH_USER,
+        payload: response.data
+      });
+    })
+    .catch(err => {});
+};
+
+export const logoutUser = () => dispatch => {
+  axios
+    .get(`${USER_SERVER}/logout`)
+    .then(response =>
+      dispatch({
+        type: LOGOUT_USER
+      })
+    )
+    .catch(err => {});
 };

@@ -1,16 +1,15 @@
-import { LOGIN_USER, FAIL_LOGIN_USER } from "../actions/types";
+import { LOGOUT_USER, AUTH_USER } from "../actions/types";
 
 const initialState = {
-  loginSucces: undefined,
   userData: {}
 };
 
 export default function(state = initialState, action) {
   switch (action.type) {
-    case LOGIN_USER:
-      return { ...state, loginSucces: action.payload };
-    case FAIL_LOGIN_USER:
-      return { ...state, loginSucces: false };
+    case AUTH_USER:
+      return { ...state, userData: action.payload };
+    case LOGOUT_USER:
+      return { ...state, userData: {} };
     default:
       return state;
   }
