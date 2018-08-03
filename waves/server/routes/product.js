@@ -8,8 +8,48 @@ const { auth } = require("./../middleware/auth");
 const { admin } = require("./../middleware/admin");
 const { normalizeErrors } = require("./../helpers/mongoose");
 
+// ROUTE  /api/product/shop
+// User filters for products to buy
+router.post("/shop", (req, res) => {
+  let order = req.body.order ? req.body.order : "desc";
+  let sortBy = req.body.sortBy ? req.body.sortBy : "_id";
+  let limit = req.body.limit ? parseInt(req.body.limit) : 100;
+  let skip = parseInt(req.body.skip);
+  let findArgs = {};
+
+  for (let key in req.body.filters) {
+    if (req.body.filters[key].length > 0) {
+      if (key === "price") {
+        findArgs[key] = {
+          $gte: req.body.filters[key][0],
+          $lte: req.body.filters[key][1]
+        };
+      } else {
+        findArgs[key] = req.body.filters[key];
+      }
+    }
+  }
+
+  // findArgs["publish"] = true;
+
+  Product.find(findArgs)
+    .populate("brand")
+    .populate("wood")
+    .sort([[sortBy, order]])
+    .skip(skip)
+    .limit(limit)
+    .exec()
+    .then(articles => {
+      res.status(200).json({
+        size: articles.length,
+        articles
+      });
+    })
+    .catch(err => res.status(422).json({ errors: normalizeErrors(err) }));
+});
+
 // ROUTE  /api/product/article
-// Admin can input product
+// Admin can add new product
 router.post("/article", auth, admin, (req, res) => {
   const product = new Product(req.body);
 

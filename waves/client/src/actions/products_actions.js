@@ -3,7 +3,8 @@ import {
   GET_PRODUCTS_BY_SELL,
   GET_PRODUCTS_BY_ARRIVAL,
   GET_BRANDS,
-  GET_WOODS
+  GET_WOODS,
+  GET_PRODUCTS_TO_SHOP
 } from "./types";
 
 import { PRODUCT_SERVER } from "../components/utils/misc";
@@ -28,6 +29,34 @@ export const getProductsByArrival = () => dispatch => {
         payload: data
       })
     );
+};
+
+export const getProductsToShop = (
+  skip,
+  limit,
+  filters = [],
+  previousState = []
+) => dispatch => {
+  const data = {
+    limit,
+    skip,
+    filters
+  };
+
+  return axios
+    .post(`${PRODUCT_SERVER}/shop`, data)
+    .then(response => {
+      let newState = [...previousState, ...response.data.articles];
+      dispatch({
+        type: GET_PRODUCTS_TO_SHOP,
+        payload: {
+          size: response.data.size,
+          articles: newState
+        }
+      });
+      return "Done";
+    })
+    .catch(err => {});
 };
 
 export const getBrands = () => dispatch => {
