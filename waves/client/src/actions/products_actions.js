@@ -59,26 +59,35 @@ export const getProductsToShop = (
     .catch(err => {});
 };
 
+export const addProduct = datatoSubmit => {
+  return axios
+    .post(`${PRODUCT_SERVER}/article`, datatoSubmit)
+    .then(response => response.data)
+    .catch(err => Promise.reject(err.response.data.errors));
+};
+
 export const getBrands = () => dispatch => {
-  axios
+  return axios
     .get(`${PRODUCT_SERVER}/brands`)
-    .then(({ data }) =>
+    .then(({ data }) => {
       dispatch({
         type: GET_BRANDS,
         payload: data
-      })
-    )
+      });
+      return "done";
+    })
     .catch(err => {});
 };
 
 export const getWoods = () => dispatch => {
-  axios
+  return axios
     .get(`${PRODUCT_SERVER}/woods`)
-    .then(({ data }) =>
+    .then(({ data }) => {
       dispatch({
         type: GET_WOODS,
         payload: data
-      })
-    )
+      });
+      return "done";
+    })
     .catch(err => {});
 };

@@ -14,6 +14,7 @@ import Shop from "./components/Shop";
 
 //Private Routes
 import UserDashboard from "./components/User";
+import AddProduct from "./components/User/Admin/add_product";
 
 class Routes extends Component {
   componentDidMount() {
@@ -27,6 +28,12 @@ class Routes extends Component {
             path="/user/dashboard"
             exact
             component={UserDashboard}
+          />
+          <PrivateRoute
+            path="/admin/add_product"
+            exact
+            adminRoute
+            component={AddProduct}
           />
           <Route path="/register" exact component={Register} />
           <Route path="/register_login" exact component={RegisterLogin} />

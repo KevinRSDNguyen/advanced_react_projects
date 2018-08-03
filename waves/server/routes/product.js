@@ -30,7 +30,7 @@ router.post("/shop", (req, res) => {
     }
   }
 
-  // findArgs["publish"] = true;
+  findArgs["publish"] = true; //Only bring products that have been published
 
   Product.find(findArgs)
     .populate("brand")
