@@ -24,8 +24,6 @@ class Fileupload extends Component {
     formData.append("file", files[0]); //We only have 1 file, so grab 1st
 
     axios.post("/api/users/uploadimage", formData, config).then(response => {
-      console.log(response.data);
-
       this.setState(
         {
           //We only add 1 image at a time
@@ -61,7 +59,7 @@ class Fileupload extends Component {
       <div
         className="dropzone_box"
         key={item.public_id}
-        onClick={this.onRemove(item.public_id)}
+        onClick={() => this.onRemove(item.public_id)}
       >
         <div
           className="wrap"

@@ -3,7 +3,9 @@ import {
   GET_PRODUCTS_BY_ARRIVAL,
   GET_BRANDS,
   GET_WOODS,
-  GET_PRODUCTS_TO_SHOP
+  GET_PRODUCTS_TO_SHOP,
+  GET_PRODUCT_DETAIL,
+  CLEAR_PRODUCT_DETAIL
 } from "../actions/types";
 
 const initialState = {
@@ -11,7 +13,8 @@ const initialState = {
   byArrival: [],
   brands: [],
   woods: [],
-  toShop: []
+  toShop: [],
+  prodDetail: ""
 };
 
 export default function(state = initialState, action) {
@@ -30,6 +33,10 @@ export default function(state = initialState, action) {
         toShop: action.payload.articles,
         toShopSize: action.payload.size
       };
+    case GET_PRODUCT_DETAIL:
+      return { ...state, prodDetail: action.payload };
+    case CLEAR_PRODUCT_DETAIL:
+      return { ...state, prodDetail: "" };
     default:
       return state;
   }

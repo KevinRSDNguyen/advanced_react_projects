@@ -31,6 +31,21 @@ router.post("/uploadimage", auth, admin, formidable(), (req, res) => {
   );
 });
 
+// ROUTE /api/users/removeimage?public_id=5849534
+router.get("/removeimage", auth, admin, (req, res) => {
+  let image_id = req.query.public_id;
+
+  cloudinary.uploader.destroy(image_id, (error, result) => {
+    if (error.result !== "ok") {
+      return res
+        .status(422)
+        .json({ errors: [{ detail: "Could not delete image" }] });
+    }
+
+    res.status(200).send("ok");
+  });
+});
+
 // ROUTE /api/users/auth
 router.get("/auth", auth, (req, res) => {
   res.json({
