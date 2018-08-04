@@ -2,8 +2,10 @@ import React, { Component } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import PageTop from "../utils/page_top";
 import ProdNfo from "./prodNfo";
+import ProdImg from "./prodImg";
 
 import { connect } from "react-redux";
+import { addToCart } from "../../actions/user_actions";
 import {
   getProductDetail,
   clearProductDetail
@@ -28,7 +30,7 @@ class ProductPage extends Component {
     this.props.clearProductDetail();
   }
   addToCartHandler(id) {
-    alert(id);
+    this.props.addToCart(id);
   }
   render() {
     return (
@@ -38,7 +40,11 @@ class ProductPage extends Component {
         <div className="container">
           {this.props.products.prodDetail ? (
             <div className="product_detail_wrapper">
-              <div className="left">images</div>
+              <div className="left">
+                <div style={{ width: "500px" }}>
+                  <ProdImg detail={this.props.products.prodDetail} />
+                </div>
+              </div>
               <div className="right">
                 <ProdNfo
                   addToCart={id => this.addToCartHandler(id)}
@@ -63,5 +69,5 @@ const mapStateToProps = state => {
 
 export default connect(
   mapStateToProps,
-  { getProductDetail, clearProductDetail }
+  { getProductDetail, clearProductDetail, addToCart }
 )(ProductPage);

@@ -1,6 +1,11 @@
 import axios from "axios";
-import { AUTH_USER, LOGOUT_USER } from "./types";
-import { USER_SERVER } from "../components/utils/misc";
+import {
+  AUTH_USER,
+  LOGOUT_USER,
+  ADD_TO_CART_USER,
+  GET_CART_ITEMS_USER
+} from "./types";
+import { USER_SERVER, PRODUCT_SERVER } from "../components/utils/misc";
 
 export const registerUser = dataToSubmit => {
   return axios
@@ -41,4 +46,42 @@ export const logoutUser = () => dispatch => {
       })
     )
     .catch(err => {});
+};
+
+export const addToCart = _id => dispatch => {
+  axios
+    .post(`${USER_SERVER}/addToCart?productId=${_id}`)
+    .then(({ data }) =>
+      dispatch({
+        type: ADD_TO_CART_USER,
+        payload: data
+      })
+    )
+    .catch(err => {});
+};
+
+//First is unique product id's, second is user's cart with quanitities
+export const getCartItems = (cartItems, userCart) => dispatch => {
+  return (
+    axios
+      //Template string sturns array of stings into 1 str
+      .get(`${PRODUCT_SERVER}/articles_by_id?id=${cartItems}&type=array`)
+      .then(({ data }) => {
+        userCart.forEach(item => {
+          data.forEach((k, i) => {
+            if (item.id === k._id) {
+              data[i].quantity = item.quantity;
+            }
+          });
+        });
+        dispatch({
+          type: GET_CART_ITEMS_USER,
+          payload: data
+        });
+        return "Done";
+      })
+      .catch(err => {
+        return Promise.reject(err.response.data.errors);
+      })
+  );
 };

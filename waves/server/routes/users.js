@@ -1,4 +1,5 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const router = express.Router();
 const formidable = require("express-formidable"); //Help us get files on req
 const cloudinary = require("cloudinary");
@@ -116,6 +117,54 @@ router.get("/logout", auth, (req, res) => {
     .catch(err => {
       return res.status(422).json({ errors: normalizeErrors(err) });
     });
+});
+
+// ROUTE /api/users/addToCart
+router.post("/addToCart", auth, (req, res) => {
+  User.findOne({ _id: req.user._id })
+    .then(doc => {
+      let duplicate = false;
+
+      doc.cart.forEach(item => {
+        if (item.id == req.query.productId) {
+          duplicate = true;
+        }
+      });
+
+      if (duplicate) {
+        User.findOneAndUpdate(
+          {
+            _id: req.user._id,
+            "cart.id": mongoose.Types.ObjectId(req.query.productId)
+          },
+          { $inc: { "cart.$.quantity": 1 } },
+          { new: true } //Recieve back updated user
+        )
+          .then(doc => {
+            res.status(200).json(doc.cart);
+          })
+          .catch(err => res.status(422).json({ errors: normalizeErrors(err) }));
+      } else {
+        User.findOneAndUpdate(
+          { _id: req.user._id },
+          {
+            $push: {
+              cart: {
+                id: mongoose.Types.ObjectId(req.query.productId),
+                quantity: 1,
+                date: Date.now()
+              }
+            }
+          },
+          { new: true } //Recieve back updated user
+        )
+          .then(doc => {
+            res.status(200).json(doc.cart);
+          })
+          .catch(err => res.status(422).json({ errors: normalizeErrors(err) }));
+      }
+    })
+    .catch(err => res.status(422).json({ errors: normalizeErrors(err) }));
 });
 
 module.exports = router;

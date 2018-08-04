@@ -17,6 +17,7 @@ import ProductPage from "./components/Product";
 import UserDashboard from "./components/User";
 import AddProduct from "./components/User/Admin/add_product";
 import ManageCategories from "./components/User/Admin/manage_categories";
+import UserCart from "./components/User/cart";
 
 class Routes extends Component {
   componentDidMount() {
@@ -31,6 +32,7 @@ class Routes extends Component {
             exact
             component={UserDashboard}
           />
+          <PrivateRoute path="/user/cart" exact component={UserCart} />
           <PrivateRoute
             path="/admin/add_product"
             exact

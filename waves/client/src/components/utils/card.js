@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import MyButton from "./button";
 
 import { connect } from "react-redux";
-// import { addToCart } from '../../actions/user_actions';
+import { addToCart } from "../../actions/user_actions";
 
 class Card extends Component {
   renderCardImage(images) {
@@ -49,14 +49,16 @@ class Card extends Component {
                 }}
               />
             </div>
-            <div className="button_wrapp">
-              <MyButton
-                type="bag_link"
-                runAction={() => {
-                  alert(props._id);
-                }}
-              />
-            </div>
+            {props.user.userData.isAuth ? (
+              <div className="button_wrapp">
+                <MyButton
+                  type="bag_link"
+                  runAction={() => {
+                    this.props.addToCart(props._id);
+                  }}
+                />
+              </div>
+            ) : null}
           </div>
         </div>
       </div>
@@ -70,4 +72,7 @@ const mapStateToProps = state => {
   };
 };
 
-export default connect(mapStateToProps)(Card);
+export default connect(
+  mapStateToProps,
+  { addToCart }
+)(Card);
