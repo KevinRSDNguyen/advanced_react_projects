@@ -3,7 +3,8 @@ import {
   AUTH_USER,
   LOGOUT_USER,
   ADD_TO_CART_USER,
-  GET_CART_ITEMS_USER
+  GET_CART_ITEMS_USER,
+  REMOVE_CART_ITEM_USER
 } from "./types";
 import { USER_SERVER, PRODUCT_SERVER } from "../components/utils/misc";
 
@@ -84,4 +85,26 @@ export const getCartItems = (cartItems, userCart) => dispatch => {
         return Promise.reject(err.response.data.errors);
       })
   );
+};
+
+export const removeCartItem = id => dispatch => {
+  return axios
+    .get(`${USER_SERVER}/removeFromCart?_id=${id}`)
+    .then(({ data }) => {
+      data.cart.forEach(item => {
+        data.cartDetail.forEach((k, i) => {
+          if (item.id === k._id) {
+            data.cartDetail[i].quantity = item.quantity;
+          }
+        });
+      });
+      dispatch({
+        type: REMOVE_CART_ITEM_USER,
+        payload: data
+      });
+      return "Done";
+    })
+    .catch(err => {
+      return Promise.reject(err.response.data.errors);
+    });
 };

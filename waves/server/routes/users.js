@@ -4,6 +4,7 @@ const router = express.Router();
 const formidable = require("express-formidable"); //Help us get files on req
 const cloudinary = require("cloudinary");
 const { User } = require("./../models/user");
+const { Product } = require("./../models/product");
 const { auth } = require("./../middleware/auth");
 const { admin } = require("./../middleware/admin");
 const { normalizeErrors } = require("./../helpers/mongoose");
@@ -163,6 +164,37 @@ router.post("/addToCart", auth, (req, res) => {
           })
           .catch(err => res.status(422).json({ errors: normalizeErrors(err) }));
       }
+    })
+    .catch(err => res.status(422).json({ errors: normalizeErrors(err) }));
+});
+
+// ROUTE /api/users/removeFromCart
+router.get("/removeFromCart", auth, (req, res) => {
+  let cart;
+  User.findOneAndUpdate(
+    { _id: req.user._id },
+    {
+      $pull: { cart: { id: mongoose.Types.ObjectId(req.query._id) } }
+    },
+    { new: true }
+  )
+    .then(doc => {
+      cart = doc.cart;
+      let array = cart.map(item => {
+        return mongoose.Types.ObjectId(item.id);
+      });
+
+      return Product.find({ _id: { $in: array } })
+        .populate("brand")
+        .populate("wood")
+        .lean() //Lets us modify
+        .exec();
+    })
+    .then(cartDetail => {
+      return res.status(200).json({
+        cartDetail,
+        cart
+      });
     })
     .catch(err => res.status(422).json({ errors: normalizeErrors(err) }));
 });
