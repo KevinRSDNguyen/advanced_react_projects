@@ -206,5 +206,19 @@
       "lastname": "test",
       "password": "testtest"
     }
+  ],
+  "sites": [
+    {
+      "name": "Site",
+      "featured": [],
+      "siteInfo": [
+        {
+          "address": "Fake Db 6996",
+          "hours": "Mon-Sat/9am-8pm",
+          "phone": "1234-56789",
+          "email": "nfofakedb@waves.com"
+        }
+      ]
+    }
   ]
 }

@@ -9,11 +9,16 @@ const { Payment } = require("./../models/payment");
 const { auth } = require("./../middleware/auth");
 const { admin } = require("./../middleware/admin");
 const { normalizeErrors } = require("./../helpers/mongoose");
+const {
+  CLOUD_NAME,
+  CLOUD_API_KEY,
+  CLOUD_API_SECRET
+} = require("./../../config/keys");
 
 cloudinary.config({
-  cloud_name: process.env.CLOUD_NAME,
-  api_key: process.env.CLOUD_API_KEY,
-  api_secret: process.env.CLOUD_API_SECRET
+  cloud_name: CLOUD_NAME,
+  api_key: CLOUD_API_KEY,
+  api_secret: CLOUD_API_SECRET
 });
 
 // ROUTE /api/users/uploadimage

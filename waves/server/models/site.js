@@ -1,6 +1,9 @@
 const mongoose = require("mongoose");
 
 const siteSchema = mongoose.Schema({
+  name: {
+    type: String
+  },
   featured: {
     //For home page
     required: true,
