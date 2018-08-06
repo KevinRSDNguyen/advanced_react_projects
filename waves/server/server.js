@@ -9,6 +9,7 @@ require("dotenv").config(); //Allows us to grab vals from .env files
 
 const userRoutes = require("./routes/users");
 const productRoutes = require("./routes/product");
+const siteRoutes = require("./routes/site");
 
 mongoose.Promise = global.Promise;
 mongoose.connect(process.env.DATABASE).then(() => {
@@ -22,6 +23,7 @@ app.use(cookieParser());
 
 app.use("/api/users", userRoutes);
 app.use("/api/product", productRoutes);
+app.use("/api/site", siteRoutes);
 
 const port = process.env.PORT || 3002;
 app.listen(port, () => {

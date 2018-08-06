@@ -19,6 +19,7 @@ import AddProduct from "./components/User/Admin/add_product";
 import ManageCategories from "./components/User/Admin/manage_categories";
 import UserCart from "./components/User/cart";
 import UpdateProfile from "./components/User/update_profile";
+import ManageSite from "./components/User/Admin/manage_site";
 
 class Routes extends Component {
   componentDidMount() {
@@ -50,6 +51,12 @@ class Routes extends Component {
             exact
             adminRoute
             component={ManageCategories}
+          />
+          <PrivateRoute
+            path="/admin/site_info"
+            exact
+            adminRoute
+            component={ManageSite}
           />
           <Route path="/product_detail/:id" exact component={ProductPage} />
           <Route path="/register" exact component={Register} />
