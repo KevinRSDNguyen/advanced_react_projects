@@ -18,6 +18,7 @@ import UserDashboard from "./components/User";
 import AddProduct from "./components/User/Admin/add_product";
 import ManageCategories from "./components/User/Admin/manage_categories";
 import UserCart from "./components/User/cart";
+import UpdateProfile from "./components/User/update_profile";
 
 class Routes extends Component {
   componentDidMount() {
@@ -33,6 +34,11 @@ class Routes extends Component {
             component={UserDashboard}
           />
           <PrivateRoute path="/user/cart" exact component={UserCart} />
+          <PrivateRoute
+            path="/user/user_profile"
+            exact
+            component={UpdateProfile}
+          />
           <PrivateRoute
             path="/admin/add_product"
             exact

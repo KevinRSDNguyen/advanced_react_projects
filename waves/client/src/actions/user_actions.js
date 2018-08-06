@@ -4,7 +4,8 @@ import {
   LOGOUT_USER,
   ADD_TO_CART_USER,
   GET_CART_ITEMS_USER,
-  REMOVE_CART_ITEM_USER
+  REMOVE_CART_ITEM_USER,
+  ON_SUCCESS_BUY_USER
 } from "./types";
 import { USER_SERVER, PRODUCT_SERVER } from "../components/utils/misc";
 
@@ -102,6 +103,32 @@ export const removeCartItem = id => dispatch => {
         type: REMOVE_CART_ITEM_USER,
         payload: data
       });
+      return "Done";
+    })
+    .catch(err => {
+      return Promise.reject(err.response.data.errors);
+    });
+};
+
+export const onSuccessBuy = data => dispatch => {
+  return axios
+    .post(`${USER_SERVER}/successBuy`, data)
+    .then(({ data }) => {
+      dispatch({
+        type: ON_SUCCESS_BUY_USER,
+        payload: data
+      });
+      return "Done";
+    })
+    .catch(err => {
+      return Promise.reject(err.response.data.errors);
+    });
+};
+
+export const updateUserData = dataToSubmit => {
+  return axios
+    .post(`${USER_SERVER}/update_profile`, dataToSubmit)
+    .then(({ data }) => {
       return "Done";
     })
     .catch(err => {

@@ -3,7 +3,11 @@ import UserLayout from "../../hoc/user";
 import UserProductBlock from "../utils/User/product_block";
 
 import { connect } from "react-redux";
-import { getCartItems, removeCartItem } from "../../actions/user_actions";
+import {
+  getCartItems,
+  removeCartItem,
+  onSuccessBuy
+} from "../../actions/user_actions";
 
 import FontAwesomeIcon from "@fortawesome/react-fontawesome";
 import faFrown from "@fortawesome/fontawesome-free-solid/faFrown";
@@ -36,10 +40,8 @@ class UserCart extends Component {
         //ids of each unique product, then current cart that only has IDs of prod
         .getCartItems(cartItems, cart)
         .then(() => {
-          if (this.props.user.cartDetail.length > 0) {
-            //cartDetail contains all info about product, unlike cart which is just id and quant
-            this.calculateTotal(this.props.user.cartDetail);
-          }
+          //cartDetail contains all info about product, unlike cart which is just id and quant
+          this.calculateTotal(this.props.user.cartDetail);
         });
     }
   }
@@ -81,21 +83,18 @@ class UserCart extends Component {
   };
 
   transactionSuccess = data => {
-    // this.props
-    //   .dispatch(
-    //     onSuccessBuy({
-    //       cartDetail: this.props.user.cartDetail,
-    //       paymentData: data
-    //     })
-    //   )
-    //   .then(() => {
-    //     if (this.props.user.successBuy) {
-    //       this.setState({
-    //         showTotal: false,
-    //         showSuccess: true
-    //       });
-    //     }
-    //   });
+    this.props
+      .onSuccessBuy({
+        cartDetail: this.props.user.cartDetail,
+        paymentData: data
+      })
+      .then(() => {
+        this.setState({
+          showTotal: false,
+          showSuccess: true
+        });
+      })
+      .catch(err => alert(err));
   };
   render() {
     return (
@@ -148,5 +147,5 @@ const mapStateToProps = state => {
 
 export default connect(
   mapStateToProps,
-  { getCartItems, removeCartItem }
+  { getCartItems, removeCartItem, onSuccessBuy }
 )(UserCart);

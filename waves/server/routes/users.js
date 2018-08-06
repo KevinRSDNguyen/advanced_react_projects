@@ -5,6 +5,7 @@ const formidable = require("express-formidable"); //Help us get files on req
 const cloudinary = require("cloudinary");
 const { User } = require("./../models/user");
 const { Product } = require("./../models/product");
+const { Payment } = require("./../models/payment");
 const { auth } = require("./../middleware/auth");
 const { admin } = require("./../middleware/admin");
 const { normalizeErrors } = require("./../helpers/mongoose");
@@ -195,6 +196,98 @@ router.get("/removeFromCart", auth, (req, res) => {
         cartDetail,
         cart
       });
+    })
+    .catch(err => res.status(422).json({ errors: normalizeErrors(err) }));
+});
+
+// ROUTE /api/users/successBuy
+router.post("/successBuy", auth, (req, res) => {
+  let updatedUser;
+  let history = [];
+  let transactionData = {}; //Becomes payment Model
+  const date = new Date();
+  // const po = `PO-${date.getSeconds()}${date.getMilliseconds()}-${SHA1(
+  //   req.user._id
+  // )
+  //   .toString()
+  //   .substring(0, 8)}`;
+
+  // user history
+  //We dont need description and wood of item purchased.
+  req.body.cartDetail.forEach(item => {
+    history.push({
+      // porder: po,
+      dateOfPurchase: Date.now(),
+      name: item.name,
+      brand: item.brand.name,
+      id: item._id,
+      price: item.price,
+      quantity: item.quantity,
+      paymentId: req.body.paymentData.paymentID
+    });
+  });
+
+  // PAYMENTS DASH
+  transactionData.user = {
+    id: req.user._id,
+    name: req.user.name,
+    lastname: req.user.lastname,
+    email: req.user.email
+  };
+  transactionData.data = {
+    ...req.body.paymentData
+    // porder: po
+  };
+  transactionData.product = history;
+
+  User.findOneAndUpdate(
+    { _id: req.user._id },
+    { $push: { history: history }, $set: { cart: [] } },
+    { new: true }
+  )
+    .then(user => {
+      updatedUser = user;
+      const payment = new Payment(transactionData);
+      return payment.save();
+    })
+    .then(doc => {
+      let promisesArr = [];
+      doc.product.forEach(item => {
+        promisesArr.push(
+          Product.update(
+            { _id: item.id },
+            {
+              $inc: {
+                sold: item.quantity
+              }
+            },
+            { new: false }
+          )
+        );
+      });
+      return Promise.all(promisesArr);
+    })
+    .then(promArr => {
+      res.status(200).json({
+        success: true,
+        cart: updatedUser.cart,
+        cartDetail: []
+      });
+    })
+    .catch(err => res.status(422).json({ errors: normalizeErrors(err) }));
+});
+
+// ROUTE /api/users/update_profile
+router.post("/update_profile", auth, (req, res) => {
+  User.findOneAndUpdate(
+    { _id: req.user._id },
+    {
+      $set: req.body
+    },
+    { new: true }
+  )
+    .then(doc => {
+      res.send(doc);
     })
     .catch(err => res.status(422).json({ errors: normalizeErrors(err) }));
 });
