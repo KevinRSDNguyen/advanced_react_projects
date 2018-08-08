@@ -1,8 +1,9 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 const SALT_I = 10;
-// require("dotenv").config();
+const moment = require("moment");
 const { SECRET } = require("./../../config/keys");
 
 const userSchema = mongoose.Schema({
@@ -79,6 +80,24 @@ userSchema.methods.comparePassword = function(candidatePassword, cb) {
   bcrypt.compare(candidatePassword, this.password, function(err, isMatch) {
     if (err) return cb(err);
     cb(null, isMatch);
+  });
+};
+
+userSchema.methods.generateResetToken = function(cb) {
+  let user = this;
+
+  crypto.randomBytes(20, function(err, buffer) {
+    let token = buffer.toString("hex");
+    let expire = moment()
+      .add(2, "hours")
+      .valueOf();
+
+    user.resetToken = token;
+    user.resetTokenExp = expire;
+    user.save(function(err, user) {
+      if (err) return cb(err);
+      cb(null, user);
+    });
   });
 };
 

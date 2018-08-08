@@ -4,7 +4,7 @@ const router = express.Router();
 const { Site } = require("./../models/site");
 const { auth } = require("./../middleware/auth");
 const { admin } = require("./../middleware/admin");
-const { normalizeErrors } = require("./../helpers/mongoose");
+const { normalizeErrors } = require("./../helpers/index");
 
 // Route /api/site/site_data
 router.get("/site_data", (req, res) => {

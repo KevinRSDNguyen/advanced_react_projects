@@ -3,12 +3,18 @@ const mongoose = require("mongoose");
 const router = express.Router();
 const formidable = require("express-formidable"); //Help us get files on req
 const cloudinary = require("cloudinary");
+const SHA1 = require("crypto-js/sha1");
 const { User } = require("./../models/user");
 const { Product } = require("./../models/product");
 const { Payment } = require("./../models/payment");
 const { auth } = require("./../middleware/auth");
 const { admin } = require("./../middleware/admin");
-const { normalizeErrors } = require("./../helpers/mongoose");
+const { sendEmail } = require("./../utils/mail/index");
+const { normalizeErrors, checkFileType } = require("./../helpers/index");
+const multer = require("multer");
+const moment = require("moment");
+const fs = require("fs");
+const path = require("path");
 const {
   CLOUD_NAME,
   CLOUD_API_KEY,
@@ -21,7 +27,54 @@ cloudinary.config({
   api_secret: CLOUD_API_SECRET
 });
 
+//Multer Config
+let storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "./uploads");
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}_${file.originalname}`); //originalname from multer
+  }
+});
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 10000000 }, //file size limit of 10mb
+  fileFilter: function(req, file, cb) {
+    checkFileType(file, cb);
+  }
+}).single("file");
+
+//Route /api/users/uploadfile
+// Save image in local
+router.post("/uploadfile", auth, admin, (req, res) => {
+  upload(req, res, err => {
+    if (err) {
+      return res.status(422).json({ errors: [{ detail: err }] });
+    }
+    return res.json({ success: true });
+  });
+});
+
+//Route /api/users/admin_files
+router.get("/admin_files", auth, admin, (req, res) => {
+  const dir = path.resolve(".") + "/uploads/";
+  fs.readdir(dir, (err, items) => {
+    if (err) {
+      return res.status(422).json({ errors: [{ detail: err }] });
+    }
+    //Returns array with name of files as strings
+    return res.status(200).send(items);
+  });
+});
+
+//Route /api/users/download/funny12345.jpg
+router.get("/download/:id", auth, admin, (req, res) => {
+  const file = path.resolve(".") + `/uploads/${req.params.id}`;
+  res.download(file);
+});
+
 // ROUTE /api/users/uploadimage
+//Upload image thru cloudinary
 router.post("/uploadimage", auth, admin, formidable(), (req, res) => {
   cloudinary.uploader.upload(
     req.files.file.path,
@@ -54,6 +107,54 @@ router.get("/removeimage", auth, admin, (req, res) => {
   });
 });
 
+// ROUTE /api/users/reset_user
+// Generate reset token on User model and email it to user
+router.post("/reset_user", (req, res) => {
+  User.findOne({ email: req.body.email })
+    .then(user => {
+      user.generateResetToken((err, user) => {
+        if (err) return res.json({ success: false, err });
+        sendEmail(user.email, user.name, "reset_password", user);
+        return res.json({ success: true });
+      });
+    })
+    .catch(err => res.status(422).json({ errors: normalizeErrors(err) }));
+});
+
+// ROUTE /api/users/reset_password
+router.post("/reset_password", (req, res) => {
+  const now = moment().valueOf();
+
+  User.findOne({
+    resetToken: req.body.resetToken,
+    resetTokenExp: {
+      $gte: now
+    }
+  })
+    .then(user => {
+      if (!user) {
+        return res.status(422).json({
+          errors: [
+            {
+              detail:
+                "Sorry, looks like the reset link does not work. Please go to the Forgot Password Page again"
+            }
+          ]
+        });
+      }
+      user.password = req.body.password;
+      user.resetToken = "";
+      user.resetTokenExp = "";
+      return user.save();
+    })
+    .then(() => {
+      return res.status(200).json({
+        success: true
+      });
+    })
+    .catch(err => res.status(422).json({ errors: normalizeErrors(err) }));
+});
+
 // ROUTE /api/users/auth
 router.get("/auth", auth, (req, res) => {
   res.json({
@@ -75,7 +176,8 @@ router.post("/register", (req, res) => {
   user
     .save()
     .then(userdata => {
-      return res.status(200).json({
+      sendEmail(userdata.email, userdata.name, "welcome");
+      return res.json({
         success: true,
         userdata
       });
@@ -211,17 +313,18 @@ router.post("/successBuy", auth, (req, res) => {
   let history = [];
   let transactionData = {}; //Becomes payment Model
   const date = new Date();
-  // const po = `PO-${date.getSeconds()}${date.getMilliseconds()}-${SHA1(
-  //   req.user._id
-  // )
-  //   .toString()
-  //   .substring(0, 8)}`;
+  //Create our own Purchase Number instead of exclusively using Paypals.
+  const po = `PO-${date.getSeconds()}${date.getMilliseconds()}-${SHA1(
+    req.user._id
+  )
+    .toString()
+    .substring(0, 8)}`;
 
   // user history
   //We dont need description and wood of item purchased.
   req.body.cartDetail.forEach(item => {
     history.push({
-      // porder: po,
+      porder: po,
       dateOfPurchase: Date.now(),
       name: item.name,
       brand: item.brand.name,
@@ -240,8 +343,8 @@ router.post("/successBuy", auth, (req, res) => {
     email: req.user.email
   };
   transactionData.data = {
-    ...req.body.paymentData
-    // porder: po
+    ...req.body.paymentData,
+    porder: po
   };
   transactionData.product = history;
 
@@ -273,6 +376,7 @@ router.post("/successBuy", auth, (req, res) => {
       return Promise.all(promisesArr);
     })
     .then(promArr => {
+      sendEmail(req.user.email, req.user.name, "purchase", transactionData);
       res.status(200).json({
         success: true,
         cart: updatedUser.cart,

@@ -6,7 +6,7 @@ const { Wood } = require("./../models/wood");
 const { Product } = require("./../models/product");
 const { auth } = require("./../middleware/auth");
 const { admin } = require("./../middleware/admin");
-const { normalizeErrors } = require("./../helpers/mongoose");
+const { normalizeErrors } = require("./../helpers/index");
 
 // ROUTE  /api/product/shop
 // User filters for products to buy
